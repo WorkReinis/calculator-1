@@ -1,0 +1,20 @@
+function NumberButton({ label, sendDataToParent, id, className }) {
+     
+     const handleMouseClick = (e) => {
+          sendDataToParent(e);
+     };
+
+     return (
+          <button 
+               onClick={handleMouseClick} 
+               id={id} 
+               className={className}
+               label={label}     
+          >
+                    
+               {label}
+          </button>
+     );
+}
+
+export default NumberButton;
