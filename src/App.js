@@ -8,17 +8,16 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useState, useEffect } from "react";
 
 function App() {
-    const [firstNumber, setFirstNumber] = useState(0);
+    const [firstNumber, setFirstNumber] = useState("0");
     const [secondNumber, setSecondNumber] = useState("Press a key");
     const [operator, setOperator] = useState("");
-    const [result, setResult] = useState(0);
+    const [result, setResult] = useState(null);
     const [waitingForSecondNumber, setWaitingForSecondNumber] = useState(false);
-    const [display, setDisplay] = useState("");
+    const [display, setDisplay] = useState("0");
     const [isDecimalUsed, setIsDecimalUsed] = useState(false);
     const [isOperatorSet, setIsOperatorSet] = useState(false);
     const [isResultProvided, setIsResultProvided] = useState(false);
     const [isFirstNumberSet, setIsFirstNumberSet] = useState(true);
-    const [isNegativeNumberSet, setIsNegativeNumberSet] = useState(false);
 
     // Array of all numbers
     const numberMap = [
@@ -42,73 +41,74 @@ function App() {
         { key: "/", name: "divide" },
     ];
 
-    let buttonText = "";
-
-    // Handles the button click for all number buttons that creates long numbers. Distinguishes between first and second number input.
+    // Handles number button click
     const handleButtonClick = (event) => {
-        buttonText = event.currentTarget.getAttribute("label");
+        const buttonValue = event.currentTarget.getAttribute("label");
 
         if (waitingForSecondNumber) {
-            if (secondNumber === "Press a key" || secondNumber === 0) {
-                setSecondNumber(buttonText);
+            if (secondNumber === "Press a key") {
+                setSecondNumber(buttonValue);
             } else {
-                setSecondNumber(secondNumber + buttonText);
+                setSecondNumber((prev) => prev + buttonValue);
             }
-        } else if (isFirstNumberSet === false && isOperatorSet === true) {
-            setFirstNumber(buttonText);
-            setIsResultProvided(false);
-            setIsFirstNumberSet(true);
         } else {
-            if (firstNumber === "0" || firstNumber === 0) {
-                setFirstNumber(buttonText);
+            if (firstNumber === "0") {
+                setFirstNumber(buttonValue);
             } else {
-                setFirstNumber(firstNumber + buttonText);
+                setFirstNumber((prev) => prev + buttonValue);
             }
         }
     };
 
-    useEffect(() => {
-        console.log("First number is: ", firstNumber);
-    }, [firstNumber]);
-
-    useEffect(() => {
-        console.log("Second number is: ", secondNumber);
-    }, [secondNumber]);
-
-    // Handles the operator click. Clears the second number value so it can be specified by user
+    // Handles operator click
     const handleOperatorClick = (event) => {
         const operatorText = event.currentTarget.getAttribute("label");
-        setSecondNumber("Press a key");
-        setOperator(operatorText);
-        setWaitingForSecondNumber(true);
-        setIsDecimalUsed(false);
-        console.log("Operator is: " + operatorText);
+        const isSecondNumberEmpty =
+            secondNumber === "Press a key" || secondNumber === "";
 
-        if (waitingForSecondNumber && secondNumber !== "Press a key") {
+        if (isResultProvided) {
+            setOperator(operatorText);
+            setIsOperatorSet(true);
+            setWaitingForSecondNumber(true);
+            setSecondNumber("Press a key");
+            setIsResultProvided(false);
+            setIsDecimalUsed(false);
+            return;
+        }
+
+        if (isOperatorSet && isSecondNumberEmpty) {
+            if (operatorText === "-" && secondNumber !== "-") {
+                setSecondNumber("-");
+                return;
+            }
+            setOperator(operatorText);
+            return;
+        }
+
+        if (
+            isOperatorSet &&
+            secondNumber !== "Press a key" &&
+            secondNumber !== "" &&
+            secondNumber !== "-"
+        ) {
             handleEqualsClick();
         }
+
+        setOperator(operatorText);
         setIsOperatorSet(true);
         setWaitingForSecondNumber(true);
+        setSecondNumber("Press a key");
+        setIsDecimalUsed(false);
         setIsResultProvided(false);
-
-        // if (
-        //     operatorText === "+" ||
-        //     operatorText === "*" ||
-        //     operatorText === "/"
-        // ) {
-        //     setIsNegativeNumberSet(true);
-        // }
-
-        // if (operatorText === "-" && isNegativeNumberSet === true) {
-        //     setIsFirstNumberSet(false);
-        //     setSecondNumber("-");
-        // }
     };
 
-    // Handles the actual mathematical operation.
+    // Handles equals click
     const handleEqualsClick = () => {
-        console.log("Equal is pressed");
-        if (waitingForSecondNumber && secondNumber !== "Press a key") {
+        if (
+            waitingForSecondNumber &&
+            secondNumber !== "Press a key" &&
+            secondNumber !== "-"
+        ) {
             let newResult;
             switch (operator) {
                 case "+":
@@ -126,18 +126,17 @@ function App() {
                 default:
                     return;
             }
-            console.log("Second number is: " + secondNumber);
             setResult(newResult);
-            setFirstNumber(newResult);
-            setIsDecimalUsed(false);
+            setFirstNumber(newResult.toString());
+            setIsDecimalUsed(newResult.toString().includes("."));
             setIsResultProvided(true);
             setWaitingForSecondNumber(false);
             setIsFirstNumberSet(false);
-            console.log("Result is: " + newResult);
         } else if (
             waitingForSecondNumber === true &&
-            secondNumber === "Press a key"
+            (secondNumber === "Press a key" || secondNumber === "-")
         ) {
+            // If second number not provided, use first number for operation (e.g., 5 + 5)
             let newResult;
             switch (operator) {
                 case "+":
@@ -158,112 +157,71 @@ function App() {
             setSecondNumber(firstNumber);
             setWaitingForSecondNumber(false);
             setResult(newResult);
-            setFirstNumber(newResult);
+            setFirstNumber(newResult.toString());
+            setIsDecimalUsed(newResult.toString().includes("."));
             setIsFirstNumberSet(false);
-        } else {
-            let newResult;
-            switch (operator) {
-                case "+":
-                    newResult = Number(firstNumber) + Number(secondNumber);
-                    break;
-                case "-":
-                    newResult = Number(firstNumber) - Number(secondNumber);
-                    break;
-                case "*":
-                    newResult = Number(firstNumber) * Number(secondNumber);
-                    break;
-                case "/":
-                    newResult = Number(firstNumber) / Number(secondNumber);
-                    break;
-                default:
-                    return;
-            }
-            setResult(newResult);
-            setFirstNumber(newResult);
-            setIsFirstNumberSet(false);
+            setIsResultProvided(true);
         }
     };
 
-    // Handle decimal number input. Allows for simply clicking the decimal button to start input
-    const handleDecimalClick = (event) => {
-        if (isDecimalUsed === false) {
-            if (waitingForSecondNumber) {
-                if (secondNumber === "Press a key" || secondNumber === 0) {
-                    setSecondNumber("0." + buttonText);
-                    setIsDecimalUsed(true);
-                } else {
-                    setSecondNumber(secondNumber + "." + buttonText);
-                    setIsDecimalUsed(true);
-                }
+    // Handles decimal point click
+    const handleDecimalClick = () => {
+        if (isDecimalUsed) return;
+
+        if (waitingForSecondNumber) {
+            if (secondNumber === "Press a key") {
+                setSecondNumber("0.");
             } else {
-                if (firstNumber === "0" || firstNumber === 0) {
-                    setFirstNumber("0." + buttonText);
-                    setIsDecimalUsed(true);
-                } else {
-                    setFirstNumber(firstNumber + "." + buttonText);
-                    setIsDecimalUsed(true);
-                }
+                setSecondNumber((prev) => prev + ".");
+            }
+        } else {
+            if (firstNumber === "0") {
+                setFirstNumber("0.");
+            } else {
+                setFirstNumber((prev) => prev + ".");
             }
         }
+        setIsDecimalUsed(true);
     };
 
-    // Code block that updates the calculators display
+    // Updates the display based on the most recent input
     useEffect(() => {
-        setDisplay(firstNumber);
-    }, [firstNumber]);
+        if (isResultProvided) {
+            setDisplay(result !== null ? result.toString() : firstNumber);
+        } else if (waitingForSecondNumber) {
+            setDisplay(secondNumber === "Press a key" ? "0" : secondNumber);
+        } else {
+            setDisplay(firstNumber);
+        }
+    }, [
+        firstNumber,
+        secondNumber,
+        result,
+        waitingForSecondNumber,
+        isResultProvided,
+    ]);
 
-    useEffect(() => {
-        setDisplay(operator);
-    }, [operator]);
-
-    useEffect(() => {
-        setDisplay(secondNumber);
-    }, [secondNumber]);
-
-    useEffect(() => {
-        setDisplay(result);
-    }, [result]);
-
-    // Resets all number values to starting values
+    // Clears all inputs and resets state
     const handleClearClick = () => {
-        setFirstNumber(0);
+        setFirstNumber("0");
         setSecondNumber("Press a key");
         setOperator("");
-        setResult(0);
+        setResult(null);
         setWaitingForSecondNumber(false);
         setIsDecimalUsed(false);
         setDisplay("0");
         setIsOperatorSet(false);
+        setIsFirstNumberSet(true);
+        setIsResultProvided(false);
         console.log("------------------------------------------------");
     };
 
-    // Listens for keyboard clicks and simulates corresponding button click
-    useEffect(() => {
-        const handleKeyPress = (event) => {
-            const buttonToPress = document.getElementById(
-                event.key.toUpperCase()
-            );
-            if (buttonToPress) {
-                buttonToPress.click();
-            }
-        };
-        document.addEventListener("keypress", handleKeyPress);
-        // Clean-up function to prevent multiple event listeners after rerender
-        return () => {
-            document.removeEventListener("keypress", handleKeyPress);
-        };
-    }, []);
-
     // CSS styling for all buttons, passed in each className prop
-    const buttonCSS =
-        "d-flex justify-content-center align-items-center w-100 p-4";
-
-    const testCSS =
-        "mb-3 mt-3 d-flex justify-content-between fs-6 col-md-6 w-100";
+    const buttonCSS = "button d-flex justify-content-center align-items-center";
 
     return (
         <div id="calculator" className="d-flex flex-row align-items-center">
-            <div className="container">
+            {/* <div className="container">
                 <div className={testCSS}>
                     <div>{firstNumber}</div>
                     <div>First Number</div>
@@ -308,9 +266,12 @@ function App() {
                     <div>{isFirstNumberSet ? "true" : "false"}</div>
                     <div>Is 1st Number Set</div>
                 </div>
-            </div>
+            </div> */}
 
-            <div className="container d-flex flex-column justify-content-center px-4">
+            <div
+                id="container"
+                className="container d-flex flex-column justify-content-center gap-3"
+            >
                 <div
                     id="display"
                     className="row m-0 d-flex justify-content-end align-items-center p-3"
@@ -318,175 +279,133 @@ function App() {
                     {display}
                 </div>
 
-                <div className="row  m-0">
-                    <div className="col-3 p-0">
-                        <ClearButton
-                            className={buttonCSS}
-                            sendDataToParent={handleClearClick}
-                            label="C"
-                            id="clear"
-                        />
-                    </div>
-
-                    <div class="col-3 p-0">
-                        <OperatorButton
-                            className={buttonCSS}
-                            sendDataToParent={handleOperatorClick}
-                            label={operatorMap[3].key}
-                            id={operatorMap[3].name}
-                        />
-                    </div>
-
-                    <div class="col-3 p-0">
-                        <OperatorButton
-                            className={buttonCSS}
-                            sendDataToParent={handleOperatorClick}
-                            label={operatorMap[2].key}
-                            id={operatorMap[2].name}
-                        />
-                    </div>
-
-                    <div class="col-3 p-0">
-                        <OperatorButton
-                            className={buttonCSS}
-                            sendDataToParent={handleOperatorClick}
-                            label={operatorMap[1].key}
-                            id={operatorMap[1].name}
-                        />
-                    </div>
+                <div className="d-flex flex-row gap-3">
+                    <ClearButton
+                        className={`${buttonCSS} utility round-button`}
+                        sendDataToParent={handleClearClick}
+                        label="C"
+                        id="clear"
+                    />
+                    <OperatorButton
+                        className={`${buttonCSS} utility round-button`}
+                        sendDataToParent={handleOperatorClick}
+                        label={operatorMap[3].key}
+                        id={operatorMap[3].name}
+                    />
+                    <OperatorButton
+                        className={`${buttonCSS} utility round-button`}
+                        sendDataToParent={handleOperatorClick}
+                        label={operatorMap[2].key}
+                        id={operatorMap[2].name}
+                    />
+                    <OperatorButton
+                        className={`${buttonCSS} utility round-button`}
+                        sendDataToParent={handleOperatorClick}
+                        label={operatorMap[1].key}
+                        id={operatorMap[1].name}
+                    />
                 </div>
 
-                <div className="row  m-0">
-                    <div className="col-9 p-0">
-                        <div className="row  m-0">
-                            <div className="col-4 p-0">
-                                <NumberButton
-                                    className={buttonCSS}
-                                    sendDataToParent={handleButtonClick}
-                                    label={numberMap[7].key}
-                                    id={numberMap[7].name}
-                                />
-                            </div>
-
-                            <div class="col-4 p-0">
-                                <NumberButton
-                                    className={buttonCSS}
-                                    sendDataToParent={handleButtonClick}
-                                    label={numberMap[8].key}
-                                    id={numberMap[8].name}
-                                />
-                            </div>
-
-                            <div class="col-4 p-0">
-                                <NumberButton
-                                    className={buttonCSS}
-                                    sendDataToParent={handleButtonClick}
-                                    label={numberMap[9].key}
-                                    id={numberMap[9].name}
-                                />
-                            </div>
+                <div className="d-flex flex-row gap-3 ">
+                    <div className="d-flex flex-column gap-3 ">
+                        <div className="d-flex flex-row gap-3">
+                            <NumberButton
+                                className={`${buttonCSS} round-button`}
+                                sendDataToParent={handleButtonClick}
+                                label={numberMap[7].key}
+                                id={numberMap[7].name}
+                            />
+                            <NumberButton
+                                className={`${buttonCSS} round-button`}
+                                sendDataToParent={handleButtonClick}
+                                label={numberMap[8].key}
+                                id={numberMap[8].name}
+                            />
+                            <NumberButton
+                                className={`${buttonCSS} round-button`}
+                                sendDataToParent={handleButtonClick}
+                                label={numberMap[9].key}
+                                id={numberMap[9].name}
+                            />
                         </div>
 
-                        <div className="row  m-0">
-                            <div class="col-4 p-0">
-                                <NumberButton
-                                    className={buttonCSS}
-                                    sendDataToParent={handleButtonClick}
-                                    label={numberMap[4].key}
-                                    id={numberMap[4].name}
-                                />
-                            </div>
-
-                            <div class="col-4 p-0">
-                                <NumberButton
-                                    className={buttonCSS}
-                                    sendDataToParent={handleButtonClick}
-                                    label={numberMap[5].key}
-                                    id={numberMap[5].name}
-                                />
-                            </div>
-
-                            <div class="col-4 p-0">
-                                <NumberButton
-                                    className={buttonCSS}
-                                    sendDataToParent={handleButtonClick}
-                                    label={numberMap[6].key}
-                                    id={numberMap[6].name}
-                                />
-                            </div>
+                        <div className="d-flex flex-row gap-3">
+                            <NumberButton
+                                className={`${buttonCSS} round-button`}
+                                sendDataToParent={handleButtonClick}
+                                label={numberMap[4].key}
+                                id={numberMap[4].name}
+                            />
+                            <NumberButton
+                                className={`${buttonCSS} round-button`}
+                                sendDataToParent={handleButtonClick}
+                                label={numberMap[5].key}
+                                id={numberMap[5].name}
+                            />
+                            <NumberButton
+                                className={`${buttonCSS} round-button`}
+                                sendDataToParent={handleButtonClick}
+                                label={numberMap[6].key}
+                                id={numberMap[6].name}
+                            />
                         </div>
                     </div>
-
-                    <div className="col-3 p-0">
-                        <OperatorButton
-                            className={`${buttonCSS} h-100`}
-                            sendDataToParent={handleOperatorClick}
-                            label={operatorMap[0].key}
-                            id={operatorMap[0].name}
-                        />
-                    </div>
+                    <OperatorButton
+                        className={`${buttonCSS} plus utility vertical-button`}
+                        sendDataToParent={handleOperatorClick}
+                        label={operatorMap[0].key}
+                        id={operatorMap[0].name}
+                    />
                 </div>
 
-                <div className="row  m-0">
-                    <div className="col-9 p-0">
-                        <div className="row  m-0">
-                            <div className="col-4 p-0">
-                                <NumberButton
-                                    className={buttonCSS}
-                                    sendDataToParent={handleButtonClick}
-                                    label={numberMap[1].key}
-                                    id={numberMap[1].name}
-                                />
-                            </div>
+                <div className="d-flex flex-row gap-3 ">
+                    <div className="d-flex flex-column gap-3 ">
+                        <div className="d-flex flex-row gap-3">
+                            <NumberButton
+                                className={`${buttonCSS} round-button`}
+                                sendDataToParent={handleButtonClick}
+                                label={numberMap[1].key}
+                                id={numberMap[1].name}
+                            />
 
-                            <div className="col-4 p-0">
-                                <NumberButton
-                                    className={buttonCSS}
-                                    sendDataToParent={handleButtonClick}
-                                    label={numberMap[2].key}
-                                    id={numberMap[2].name}
-                                />
-                            </div>
+                            <NumberButton
+                                className={`${buttonCSS} round-button`}
+                                sendDataToParent={handleButtonClick}
+                                label={numberMap[2].key}
+                                id={numberMap[2].name}
+                            />
 
-                            <div className="col-4 p-0">
-                                <NumberButton
-                                    className={buttonCSS}
-                                    sendDataToParent={handleButtonClick}
-                                    label={numberMap[3].key}
-                                    id={numberMap[3].name}
-                                />
-                            </div>
+                            <NumberButton
+                                className={`${buttonCSS} round-button`}
+                                sendDataToParent={handleButtonClick}
+                                label={numberMap[3].key}
+                                id={numberMap[3].name}
+                            />
                         </div>
 
-                        <div className="row  m-0">
-                            <div className="col-8 p-0">
-                                <NumberButton
-                                    className={buttonCSS}
-                                    sendDataToParent={handleButtonClick}
-                                    label={numberMap[0].key}
-                                    id={numberMap[0].name}
-                                />
-                            </div>
+                        <div className="d-flex flex-row gap-3">
+                            <NumberButton
+                                className={`${buttonCSS} horizontal-button`}
+                                sendDataToParent={handleButtonClick}
+                                label={numberMap[0].key}
+                                id={numberMap[0].name}
+                            />
 
-                            <div class="col-4 p-0">
-                                <DecimalButton
-                                    className={buttonCSS}
-                                    sendDataToParent={handleDecimalClick}
-                                    label="."
-                                    id="decimal"
-                                />
-                            </div>
+                            <DecimalButton
+                                className={`${buttonCSS} round-button`}
+                                sendDataToParent={handleDecimalClick}
+                                label="."
+                                id="decimal"
+                            />
                         </div>
                     </div>
 
-                    <div class="col-3 p-0">
-                        <EqualsButton
-                            className={`${buttonCSS} h-100`}
-                            sendDataToParent={handleEqualsClick}
-                            label="="
-                            id="equals"
-                        />
-                    </div>
+                    <EqualsButton
+                        className={`${buttonCSS} accent vertical-button`}
+                        sendDataToParent={handleEqualsClick}
+                        label="="
+                        id="equals"
+                    />
                 </div>
             </div>
         </div>

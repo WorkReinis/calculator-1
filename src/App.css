@@ -1,47 +1,105 @@
-#calculator {
-  padding: 20px;
-  border-radius: 16px;
-
-  /* Frosted glass look code block*/
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.1));
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.20);
-  width: 1000px;
-}
-
-#display {
-  font-size: 1.5em;
-  background-color: #333;
-  color: white;
-  width: 100%;
-  height: 4rem;
-}
-
-button {
-  width: 80px;
-  height: 80px;
-  margin: 5px;
-  font-size: 1.2em;
-  transition: transform 0.1s ease;
-}
-
-/* Button animation code block */
-button.active {
-  transform: scale(0.9);
+:root {
+    --accent-color: rgb(229, 132, 57);
+    --primary-color: #969da0;
+    --secondary-color: rgb(40, 53, 66);
 }
 
 /* Gradient background code block */
 body {
-  background: linear-gradient(-45deg, #f7ccb4, #f0a6d1, #a3d8f4, #b3e7d8);
-  background-size: 400% 400%;
-  animation: gradient 20s ease infinite;
+    background: linear-gradient(
+        -45deg,
+        rgb(229, 132, 57),         /* accent */
+        #d7b6a3,                   /* soft beige-pink */
+        #a6b3ba,                   /* desaturated gray-blue (matches primary) */
+        rgb(40, 53, 66)            /* secondary dark slate */
+    );
+    background-size: 400% 400%;
+    animation: gradient 20s ease infinite;
 }
 
 /* Gradient background animation code block */
 @keyframes gradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
+#calculator {
+    padding: 30px;
+    border-radius: 60px;
+    width: 100%;
+    max-width: 430px; /* Set a max width */
+    background: var(--secondary-color);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+}
+
+#container {
+    padding: 0;
+}
+
+#display {
+    font-size: 3.5em;
+    width: 100%;
+    max-width: 100%;
+    color: white;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block; /* Ensure it's a block-level element */
+}
+
+.button {
+    transition: transform 0.1s ease;
+    font-size: 1.6rem;
+    background-color: transparent;
+    box-shadow: 0px 6px 3px 0 rgba(0, 0, 0, 0.3),
+        0px -4px 3px 0 rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+/* Button animation code block */
+.button:active {
+    transform: scale(0.8);
+}
+
+.accent {
+    background-color: var(--accent-color);
+}
+
+.utility {
+    background-color: rgba(255, 255, 255, 0.03);
+    color: var(--accent-color);
+}
+
+.round-button {
+    border-radius: 99px;
+    width: 80px;
+    height: 80px;
+    border: none;
+    padding: none;
+    margin: none;
+}
+
+.vertical-button {
+    border-radius: 99px;
+    width: 80px;
+    flex-grow: 1;
+    border: none;
+    padding: none;
+    margin: none;
+}
+
+.horizontal-button {
+    border-radius: 99px;
+    flex-grow: 1;
+    border: none;
+    padding: none;
+    margin: none;
+}
