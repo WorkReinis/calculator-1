@@ -8,10 +8,10 @@
 body {
     background: linear-gradient(
         -45deg,
-        rgb(229, 132, 57),         /* accent */
-        #d7b6a3,                   /* soft beige-pink */
-        #a6b3ba,                   /* desaturated gray-blue (matches primary) */
-        rgb(40, 53, 66)            /* secondary dark slate */
+        rgb(229, 132, 57),         
+        #d7b6a3,                   
+        #a6b3ba,                  
+        rgb(40, 53, 66)            
     );
     background-size: 400% 400%;
     animation: gradient 20s ease infinite;
@@ -34,7 +34,7 @@ body {
     padding: 30px;
     border-radius: 60px;
     width: 100%;
-    max-width: 430px; /* Set a max width */
+    max-width: 430px; 
     background: var(--secondary-color);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
 }
@@ -52,7 +52,7 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    display: block; /* Ensure it's a block-level element */
+    display: block; 
 }
 
 .button {
@@ -64,7 +64,6 @@ body {
     color: white;
 }
 
-/* Button animation code block */
 .button:active {
     transform: scale(0.8);
 }
